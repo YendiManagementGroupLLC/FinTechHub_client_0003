@@ -161,8 +161,8 @@ public class YahooLoader {
 	public void loadData() throws Exception {
 		print("Starting the load process ...");
 
-		String[] pennyStocks = { "AAPL", "ABIL", "RKDA", "GEVO", "NAKD", "CRON", "GEVO", "EGY", "DEST", "BLNK", "SNES", "SNES",
-				"DPW", "JVA", "AVXL", "CRON", "POTN", "KBLB", "BLNK" };
+		String[] pennyStocks = { "AAPL", "ABIL", "AVXL", "BLNK", "CRON", "DEST", "DPW", "EGY", "GEVO", "JVA", "KBLB",
+				"NAKD", "POTN", "RKDA", "SNES" };
 
 		MongoClient mongoClient = MongoClients.create(mongoCxn);
 		MongoDatabase database = mongoClient.getDatabase("test");
