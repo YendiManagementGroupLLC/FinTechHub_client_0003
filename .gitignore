@@ -1,1 +1,2 @@
-/SymbolDataLoader/bin/ext/com/digitalasset/hirevue/*.class
+/SymbolDataLoader/bin
+/SymbolDataLoader/.gradle
