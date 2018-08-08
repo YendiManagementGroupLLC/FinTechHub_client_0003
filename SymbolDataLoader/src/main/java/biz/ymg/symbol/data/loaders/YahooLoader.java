@@ -32,6 +32,7 @@ import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.result.UpdateResult;
 
 import biz.ymg.symbol.data.HistoricalPriceStore;
+import biz.ymg.symbol.data.SymbolList;
 
 public class YahooLoader {
 
@@ -161,22 +162,21 @@ public class YahooLoader {
 	public void loadData() throws Exception {
 		print("Starting the load process ...");
 
-		String[] pennyStocks = { "AAPL", "ABIL", "AVXL", "BLNK", "CRON", "DEST", "DPW", "EGY", "FB", "GEVO", "JVA",
-				"KBLB", "NAKD", "POTN", "RKDA", "SNES" };
+		String[] allSymbols = SymbolList.ALL_SYMBOLS;
 
 		MongoClient mongoClient = MongoClients.create(mongoCxn);
 		MongoDatabase database = mongoClient.getDatabase("test");
 
-		for (String pennyStock : pennyStocks) {
+		for (String currSymbol : allSymbols) {
 			String message = "";
 			String resultMessages = "";
-			List<String> prices = getHistoricalPriceStore(pennyStock);
-			MongoCollection<Document> collection = database.getCollection(pennyStock);
+			List<String> prices = getHistoricalPriceStore(currSymbol);
+			MongoCollection<Document> collection = database.getCollection(currSymbol);
 			long previousCount = collection.countDocuments();
 			long incomingCount = prices.size();
 			for (String price : prices) {
 				String priceString = jsonFix(price);
-				Document priceDetails = toDocument(pennyStock, priceString);
+				Document priceDetails = toDocument(currSymbol, priceString);
 				long dateKey = priceDetails.getLong("date");
 				Bson searchArg = Filters.eq("date", dateKey);
 				int matchIndex = 0;
@@ -187,25 +187,25 @@ public class YahooLoader {
 					matchMessages += String.valueOf(matchIndex) + "=>" + String.valueOf(match) + ";";
 				}
 				if (matchIndex == 0) {
-					message = String.valueOf(pennyStock) + " No matches for ["
+					message = String.valueOf(currSymbol) + " No matches for ["
 							+ String.valueOf(datetimeFromLong(dateKey)) + "] " + String.valueOf(searchArg);
 					print(message);
 				}
 				if (matchIndex > 1) {
-					message = String.valueOf(pennyStock) + " Multiple matches for ["
+					message = String.valueOf(currSymbol) + " Multiple matches for ["
 							+ String.valueOf(datetimeFromLong(dateKey)) + "] " + String.valueOf(searchArg) + " => "
 							+ String.valueOf(matchMessages);
 					print(message);
 				}
 				UpdateResult result = collection.replaceOne(searchArg, priceDetails, new ReplaceOptions().upsert(true));
 				if (matchIndex != 1) {
-					resultMessages += String.valueOf(pennyStock) + " DATE: " + String.valueOf(datetimeFromLong(dateKey))
+					resultMessages += String.valueOf(currSymbol) + " DATE: " + String.valueOf(datetimeFromLong(dateKey))
 							+ " [" + String.valueOf(dateKey) + "] result=" + String.valueOf(result.toString()) + "\n";
 				}
 			}
 			long currentCount = collection.countDocuments();
 			if (incomingCount != currentCount) {
-				message = String.valueOf(pennyStock) + " STATS: incoming_count=" + String.valueOf(incomingCount)
+				message = String.valueOf(currSymbol) + " STATS: incoming_count=" + String.valueOf(incomingCount)
 						+ "; previous_count=" + String.valueOf(previousCount) + "; currentCount="
 						+ String.valueOf(currentCount);
 				print(message);
