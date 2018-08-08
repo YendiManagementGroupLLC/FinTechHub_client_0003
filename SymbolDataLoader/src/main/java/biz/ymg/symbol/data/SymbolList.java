@@ -18,7 +18,7 @@ public class SymbolList {
 			"BHGE", 
 			"BLNK", 
 			"BNDX", 
-			"BRK.B", 
+			"BRK-B", 
 			"BSV", 
 			"CASH", 
 			"CELG", 
