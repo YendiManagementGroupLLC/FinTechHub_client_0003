@@ -163,6 +163,7 @@ public class YahooLoader {
 		print("Starting the load process ...");
 
 		String[] allSymbols = SymbolList.ALL_SYMBOLS;
+		List<String> skippedSymbols = new ArrayList<String>();
 
 		MongoClient mongoClient = MongoClients.create(mongoCxn);
 		MongoDatabase database = mongoClient.getDatabase("test");
@@ -170,7 +171,23 @@ public class YahooLoader {
 		for (String currSymbol : allSymbols) {
 			String message = "";
 			String resultMessages = "";
-			List<String> prices = getHistoricalPriceStore(currSymbol);
+			List<String> prices = null;
+			int retryCount = 3;
+			for (int currAttempt = 1; currAttempt <= retryCount; currAttempt++) {
+				try {
+					prices = getHistoricalPriceStore(currSymbol);
+					break;
+				} catch (Exception e) {
+					print(e.toString());
+					print(String.valueOf(e.getCause()));
+					print(currAttempt + " FETCH ATTEMPT ERROR for " + currSymbol);
+				}
+			}
+			if (prices == null) {
+				skippedSymbols.add(currSymbol);
+				print("Skipping processing for " + currSymbol);
+				continue;
+			}
 			MongoCollection<Document> collection = database.getCollection(currSymbol);
 			long previousCount = collection.countDocuments();
 			long incomingCount = prices.size();
@@ -216,6 +233,11 @@ public class YahooLoader {
 		}
 
 		mongoClient.close();
+
+	    if (skippedSymbols.size() > 0) {
+	        String allSkippedSymbols = String.join("; ", skippedSymbols);
+	        print("All skipped symbols => " + allSkippedSymbols);
+	    }
 
 		print("All done!");
 	}

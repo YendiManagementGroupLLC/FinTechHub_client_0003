@@ -2,7 +2,7 @@ package biz.ymg.symbol.data;
 
 public class SymbolList {
 	
-	public static final String[] ALL_SYMBOLS = { "AAPL", 
+	public static final String[] ALL_SYMBOLS = { "NOTASYM", "AAPL", 
 			"ABIL", 
 			"ADM", 
 			"AES", 
