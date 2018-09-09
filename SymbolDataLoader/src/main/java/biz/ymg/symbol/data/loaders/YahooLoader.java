@@ -178,6 +178,7 @@ public class YahooLoader {
 					prices = getHistoricalPriceStore(currSymbol);
 					break;
 				} catch (Exception e) {
+					e.printStackTrace();
 					print(e.toString());
 					print(String.valueOf(e.getCause()));
 					print(currAttempt + " FETCH ATTEMPT ERROR for " + currSymbol);
@@ -232,7 +233,15 @@ public class YahooLoader {
 			}
 		}
 
-		mongoClient.close();
+		try {
+			mongoClient.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			print(e.toString());
+			print(String.valueOf(e.getCause()));
+			mongoClient = null;
+		}
 
 	    if (skippedSymbols.size() > 0) {
 	        String allSkippedSymbols = String.join("; ", skippedSymbols);
